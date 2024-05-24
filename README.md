@@ -1,5 +1,5 @@
 
-# Social interactions do not affect _Mycoplasma spp._ infection in griffon vultures
+# Influence of intermittent stream dynamics on predator-prey interactions
 
 ## Authors
 - Milena Gonçalves-Silva (1)
