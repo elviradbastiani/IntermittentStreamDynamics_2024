@@ -155,7 +155,7 @@ colnames(saida)[1] <- "pool"
 write.csv(as.matrix(saida), "results_norm_dry.csv")
 
 ##########################################################################################
-############Script -Theorical model based on observed predator richness 
+############Script - Theorical model based on observed predator richness 
 ##########################################################################################
 
 #number of pools
