@@ -400,6 +400,14 @@ p1 <- ggplot(data = pool1, mapping = aes(x = prey_sub, y = Aninhamento_sub)) +
                         "\nP-value = <0.05***"))
 
 
+# Calculate Z-scores for nestedness
+zs_nestedness_pool1 <- (pool1$Aninhamento_observed[1] - mean(pool1$Aninhamento_sub)) / sd(pool1$Aninhamento_sub)
+
+# Calculate Z-scores for modularity
+zs_modularity_pool1 <- (pool1$Modularidade_observed[1] - mean(pool1$Modularidade_sub)) / sd(pool1$Modularidade_sub)
+
+# Calculate Z-scores for specialization
+zs_specialization_pool1 <- (pool1$Specialization_observed[1] - mean(pool1$Specialization_sub)) / sd(pool1$Specialization_sub)
 
 
 
