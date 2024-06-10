@@ -126,7 +126,7 @@ write.csv(results_norm_flowing, "results_norm_flowing.csv")
 total_de_poll <- 22
 
 # Loop through each pool network
-saida <- NULL
+output <- NULL
 for (n in 1:total_de_poll) {
   net_dry <- read.csv2(paste0("P", n, ".csv"), sep = ";", row.names = 1, dec = ".")
   net_dry <- as.matrix(net_dry)
@@ -142,17 +142,17 @@ for (n in 1:total_de_poll) {
   results_norm_dry <- metrics_norm(net_dry, 1000)
   
   if (n == 1) {
-    saida <- c(n, results_norm_dry)
+    output <- c(n, results_norm_dry)
   } else {
-    saidab <- c(n, results_norm_dry)
-    saida <- rbind(saida, saidab)
+    outputb <- c(n, results_norm_dry)
+    output <- rbind(output, outputb)
   }
 }
 
 # Organize and write results to CSV
-saida <- as.data.frame(saida)
-colnames(saida)[1] <- "pool"
-write.csv(as.matrix(saida), "results_norm_dry.csv")
+output <- as.data.frame(output)
+colnames(output)[1] <- "pool"
+write.csv(as.matrix(output), "results_norm_dry.csv")
 
 ##########################################################################################
 ############Script - Theoretical model based on observed predator richness 
@@ -205,10 +205,12 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
   #NODF_obs = nested(net_poll, method = "NODF2", rescale = FALSE, normalised = TRUE)
   NODF_obs = nested(net_poll, method = "NODF2", rescale = FALSE) / 100
   NODF_obs = round(NODF_obs, digits = 3)
+
   #specialization
   specialization_o <- H2fun(net_poll, F)
   speci_o <- as.data.frame(specialization_o)
   Specialization_obs <- speci_o$specialization_o
+
   #modularity
   m = graph_from_incidence_matrix(net_poll)
   louvain <- cluster_louvain(m)
@@ -248,10 +250,12 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
     #nestedness
     NODF_sub = nested(sub, method = "NODF2", rescale = FALSE) / 100
     NODF_sub = round(NODF_sub, digits = 3)
+
     #specialization
     specialization_s <- H2fun(sub, F)
     speci_s <- as.data.frame(specialization_s)
     Specialization_sub <- speci_s$specialization_s
+
     #modularity
     m_sub = graph_from_incidence_matrix(sub)
     louvain_sub <- cluster_louvain(m_sub)
@@ -260,7 +264,7 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
     #here you can also include the h2 index if you want
     
     if (n == 1) {
-      saida = c(n_network,  #which pool are you analyzing
+      output = c(n_network,  #which pool are you analyzing
                 n,  #which simulated subnetwork
                 predator_obs,
                 prey_obs,
@@ -274,7 +278,7 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
                 Specialization_sub,
                 Modularidade_sub)
     } else {
-      saidab = c(n_network,
+      outputb = c(n_network,
                  n,
                  predator_obs,
                  prey_obs,
@@ -287,32 +291,32 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
                  NODF_sub,
                  Specialization_sub,
                  Modularidade_sub)
-      saida = rbind(saida, saidab)
+      output = rbind(output, outputb)
     }
   }
 
-  saida=as.data.frame(saida)
-  colnames(saida)[1] <- "poll"
-  colnames(saida)[2] <- "name_sub_net"
-  colnames(saida)[3] <- "predator_observed"
-  colnames(saida)[4] <- "prey_observed"
-  colnames(saida)[5] <- "Aninhamento_observed"
-  colnames(saida)[6] <- "Specialization_observed"
-  colnames(saida)[7] <- "H2min_observed"
-  colnames(saida)[8] <- "H2max_observed"
-  colnames(saida)[9] <- "H2uncorr_observed"
-  colnames(saida)[10] <- "Modularidade_observed"
+  output=as.data.frame(output)
+  colnames(output)[1] <- "poll"
+  colnames(output)[2] <- "name_sub_net"
+  colnames(output)[3] <- "predator_observed"
+  colnames(output)[4] <- "prey_observed"
+  colnames(output)[5] <- "Aninhamento_observed"
+  colnames(output)[6] <- "Specialization_observed"
+  colnames(output)[7] <- "H2min_observed"
+  colnames(output)[8] <- "H2max_observed"
+  colnames(output)[9] <- "H2uncorr_observed"
+  colnames(output)[10] <- "Modularidade_observed"
   
-  colnames(saida)[11] <- "predator_sub"
-  colnames(saida)[12] <- "prey_sub"
-  colnames(saida)[13] <- "Aninhamento_sub"
-  colnames(saida)[14] <- "Specialization_sub"
-  colnames(saida)[15] <- "H2min_sub"
-  colnames(saida)[16] <- "H2max_sub"
-  colnames(saida)[17] <- "H2uncorr_sub"
-  colnames(saida)[18] <- "Modularidade_sub"
+  colnames(output)[11] <- "predator_sub"
+  colnames(output)[12] <- "prey_sub"
+  colnames(output)[13] <- "Aninhamento_sub"
+  colnames(output)[14] <- "Specialization_sub"
+  colnames(output)[15] <- "H2min_sub"
+  colnames(output)[16] <- "H2max_sub"
+  colnames(output)[17] <- "H2uncorr_sub"
+  colnames(output)[18] <- "Modularidade_sub"
   
-  write.table(saida,file = paste("poll_",n_network,"_saida_modelo_null.txt"), col.names=TRUE,row.names=FALSE,sep="\t")
+  write.table(output,file = paste("poll_",n_network,"_output_theoretical_model.txt"), col.names=TRUE,row.names=FALSE,sep="\t")
   
   #next pool
   n_network=n_network+1
@@ -329,28 +333,28 @@ for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1,
 
 # Perform linear regression for each pool and each metric
 #load the data files
-pool1 <- read.table("poll_ 1 _saida_modelo_null.txt", h=T)
-pool2 <- read.table("poll_ 2 _saida_modelo_null.txt", h=T)
-pool3 <- read.table("poll_ 3 _saida_modelo_null.txt", h=T)
-pool4 <- read.table("poll_ 4 _saida_modelo_null.txt", h=T)
-pool5 <- read.table("poll_ 5 _saida_modelo_null.txt", h=T)
-pool6 <- read.table("poll_ 6 _saida_modelo_null.txt", h=T)
-pool7 <- read.table("poll_ 7 _saida_modelo_null.txt", h=T)
-pool8 <- read.table("poll_ 8 _saida_modelo_null.txt", h=T)
-pool9 <- read.table("poll_ 9 _saida_modelo_null.txt", h=T)
-pool10 <- read.table("poll_ 10 _saida_modelo_null.txt", h=T)
-pool11 <- read.table("poll_ 11 _saida_modelo_null.txt", h=T)
-pool12 <- read.table("poll_ 12 _saida_modelo_null.txt", h=T)
-pool13 <- read.table("poll_ 13 _saida_modelo_null.txt", h=T)
-pool14 <- read.table("poll_ 14 _saida_modelo_null.txt", h=T)
-pool15 <- read.table("poll_ 15 _saida_modelo_null.txt", h=T)
-pool16 <- read.table("poll_ 16 _saida_modelo_null.txt", h=T)
-pool17 <- read.table("poll_ 17 _saida_modelo_null.txt", h=T)
-pool18 <- read.table("poll_ 18 _saida_modelo_null.txt", h=T)
-pool19 <- read.table("poll_ 19 _saida_modelo_null.txt", h=T)
-pool20 <- read.table("poll_ 20 _saida_modelo_null.txt", h=T)
-pool21 <- read.table("poll_ 21 _saida_modelo_null.txt", h=T)
-pool22 <- read.table("poll_ 22 _saida_modelo_null.txt", h=T)
+pool1 <- read.table("poll_ 1 _output_theoretical_model.txt", h=T)
+pool2 <- read.table("poll_ 2 _output_theoretical_model.txt", h=T)
+pool3 <- read.table("poll_ 3 _output_theoretical_model.txt", h=T)
+pool4 <- read.table("poll_ 4 _output_theoretical_model.txt", h=T)
+pool5 <- read.table("poll_ 5 _output_theoretical_model.txt", h=T)
+pool6 <- read.table("poll_ 6 _output_theoretical_model.txt", h=T)
+pool7 <- read.table("poll_ 7 _output_theoretical_model.txt", h=T)
+pool8 <- read.table("poll_ 8 _output_theoretical_model.txt", h=T)
+pool9 <- read.table("poll_ 9 _output_theoretical_model.txt", h=T)
+pool10 <- read.table("poll_ 10 _output_theoretical_model.txt", h=T)
+pool11 <- read.table("poll_ 11 _output_theoretical_model.txt", h=T)
+pool12 <- read.table("poll_ 12 _output_theoretical_model.txt", h=T)
+pool13 <- read.table("poll_ 13 _output_theoretical_model.txt", h=T)
+pool14 <- read.table("poll_ 14 _output_theoretical_model.txt", h=T)
+pool15 <- read.table("poll_ 15 _output_theoretical_model.txt", h=T)
+pool16 <- read.table("poll_ 16 _output_theoretical_model.txt", h=T)
+pool17 <- read.table("poll_ 17 _output_theoretical_model.txt", h=T)
+pool18 <- read.table("poll_ 18 _output_theoretical_model.txt", h=T)
+pool19 <- read.table("poll_ 19 _output_theoretical_model.txt", h=T)
+pool20 <- read.table("poll_ 20 _output_theoretical_model.txt", h=T)
+pool21 <- read.table("poll_ 21 _output_theoretical_model.txt", h=T)
+pool22 <- read.table("poll_ 22 _output_theoretical_model.txt", h=T)
 
 # Example scatterplot
 
@@ -408,21 +412,6 @@ zs_modularity_pool1 <- (pool1$Modularidade_observed[1] - mean(pool1$Modularidade
 
 # Calculate Z-scores for specialization
 zs_specialization_pool1 <- (pool1$Specialization_observed[1] - mean(pool1$Specialization_sub)) / sd(pool1$Specialization_sub)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
