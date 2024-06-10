@@ -153,3 +153,231 @@ for (n in 1:total_de_poll) {
 saida <- as.data.frame(saida)
 colnames(saida)[1] <- "pool"
 write.csv(as.matrix(saida), "results_norm_dry.csv")
+
+##########################################################################################
+############Script -Theorical model based on observed predator richness 
+##########################################################################################
+
+#number of pools
+total_poll <- 22
+
+# here just to start at pool network 1
+n_network = 0
+
+for (n_network in 1:total_poll) {  # here I renamed your networks as: network_1, network_2, network_3....
+  #inform:
+  n_amostral = 1000
+  #load the data
+  all_poll <- read.csv2("fooditems_flowing.csv", header=TRUE)  # here goes the full network
+  sampling_poll <- read.csv2(paste0("P", n_network, ".csv"), header=TRUE)  # each pool
+  
+  #define the names of the network files' rows
+  row.names(all_poll) = all_poll[,1]
+  row.names(sampling_poll) = sampling_poll[,1]
+  
+  #convert networks to matrix
+  all_poll = as.matrix(all_poll[, 2:ncol(all_poll)])
+  sampling_poll = as.matrix(sampling_poll[, 2:ncol(sampling_poll)])
+  
+  #Convert character elements to numeric
+  all_poll_numeric <- array(as.numeric(all_poll), dim = dim(all_poll))
+  sampling_poll_numeric <- array(as.numeric(sampling_poll), dim = dim(sampling_poll))
+  #Set the same format and names
+  dimnames(all_poll_numeric) <- dimnames(all_poll)
+  dimnames(sampling_poll_numeric) <- dimnames(sampling_poll)
+  
+  #now here we are preparing to sample the random networks, so we will use the all_poll network for the sampling_poll
+  
+  #change the object name
+  all_poll <- all_poll_numeric
+  dimnames(all_poll) <- dimnames(all_poll_numeric)
+  
+  net_poll <- sampling_poll_numeric
+  dimnames(net_poll) <- dimnames(sampling_poll_numeric)
+  
+  #First we need to know the number of predators and the number of preys
+  #number of predators
+  predator_obs = nrow(net_poll)
+  #number of preys
+  prey_obs = ncol(net_poll)
+  
+  #nestedness
+  #NODF_obs = nested(net_poll, method = "NODF2", rescale = FALSE, normalised = TRUE)
+  NODF_obs = nested(net_poll, method = "NODF2", rescale = FALSE) / 100
+  NODF_obs = round(NODF_obs, digits = 3)
+  #specialization
+  specialization_o <- H2fun(net_poll, F)
+  speci_o <- as.data.frame(specialization_o)
+  Specialization_obs <- speci_o$specialization_o
+  #modularity
+  m = graph_from_incidence_matrix(net_poll)
+  louvain <- cluster_louvain(m)
+  Modularidade_obs = modularity(louvain)
+  
+  #define the number of predator species (predator richness) you have in the pool you are going to analyze
+  nl = nrow(net_poll)
+  nc = ncol(net_poll)
+  
+  for (n in 1:n_amostral) {
+    sub = all_poll
+    
+    while (nrow(sub) > nrow(net_poll)) {
+      #remove the predators
+      ls = floor(runif(1, 1, nrow(sub) + 1))
+      #define the new sub network
+      sub = sub[-ls,]
+      
+      # sub = sub[, !!colSums(sub)] #eliminate those that do not interact
+      # sub = sub[!!rowSums(sub),]
+      
+      # Eliminate rows and columns with all zeros
+      sub <- sub[, colSums(sub) > 0]
+      sub <- sub[rowSums(sub) > 0,]
+      
+    }
+    #save each subnet
+    nome <- paste0("poll_", n_network, "_subnet_", n, ".txt", sep = " ")
+    write.table(sub, nome, col.names = NA, row.names = T, sep = "\t")
+    
+    #now let's calculate the network metrics
+    #number of predators
+    predator_sub = nrow(sub)
+    #number of prey
+    prey_sub = ncol(sub)
+    
+    #nestedness
+    NODF_sub = nested(sub, method = "NODF2", rescale = FALSE) / 100
+    NODF_sub = round(NODF_sub, digits = 3)
+    #specialization
+    specialization_s <- H2fun(sub, F)
+    speci_s <- as.data.frame(specialization_s)
+    Specialization_sub <- speci_s$specialization_s
+    #modularity
+    m_sub = graph_from_incidence_matrix(sub)
+    louvain_sub <- cluster_louvain(m_sub)
+    Modularidade_sub = modularity(louvain_sub)
+    
+    #here you can also include the h2 index if you want
+    
+    if (n == 1) {
+      saida = c(n_network,  #which pool are you analyzing
+                n,  #which simulated subnetwork
+                predator_obs,
+                prey_obs,
+                NODF_obs,
+                Specialization_obs,
+                Modularidade_obs,
+                
+                predator_sub,
+                prey_sub,
+                NODF_sub,
+                Specialization_sub,
+                Modularidade_sub)
+    } else {
+      saidab = c(n_network,
+                 n,
+                 predator_obs,
+                 prey_obs,
+                 NODF_obs,
+                 Specialization_obs,
+                 Modularidade_obs,
+                 
+                 predator_sub,
+                 prey_sub,
+                 NODF_sub,
+                 Specialization_sub,
+                 Modularidade_sub)
+      saida = rbind(saida, saidab)
+    }
+  }
+
+  saida=as.data.frame(saida)
+  colnames(saida)[1] <- "poll"
+  colnames(saida)[2] <- "name_sub_net"
+  colnames(saida)[3] <- "predator_observed"
+  colnames(saida)[4] <- "prey_observed"
+  colnames(saida)[5] <- "Aninhamento_observed"
+  colnames(saida)[6] <- "Specialization_observed"
+  colnames(saida)[7] <- "H2min_observed"
+  colnames(saida)[8] <- "H2max_observed"
+  colnames(saida)[9] <- "H2uncorr_observed"
+  colnames(saida)[10] <- "Modularidade_observed"
+  
+  colnames(saida)[11] <- "predator_sub"
+  colnames(saida)[12] <- "prey_sub"
+  colnames(saida)[13] <- "Aninhamento_sub"
+  colnames(saida)[14] <- "Specialization_sub"
+  colnames(saida)[15] <- "H2min_sub"
+  colnames(saida)[16] <- "H2max_sub"
+  colnames(saida)[17] <- "H2uncorr_sub"
+  colnames(saida)[18] <- "Modularidade_sub"
+  
+  write.table(saida,file = paste("poll_",n_network,"_saida_modelo_null.txt"), col.names=TRUE,row.names=FALSE,sep="\t")
+  
+  #next pool
+  n_network=n_network+1
+}
+
+
+# Here you will use this output and select the data from each pool to plot a graph with x (sub-predator richness) against y (sub-metric).
+# You can perform a simple linear regression with x and y. Plot that, and then with the points function, plot the observed value.
+# After that, we can calculate a z-score or compute the distance between the network structures, which is similar to the z-score
+# D = (mean(observed) - mean(simulated)) / sum(simulated). But since we're already using the z-score, we can just stick with it to make it easier
+# when writing. Let me know if you have any questions.
+# You can make this lm plot similar to the one in the article I sent you during the meeting.
+
+
+# Perform linear regression for each pool and each metric
+#load the data files
+pool1 <- read.table("poll_ 1 _saida_modelo_null.txt", h=T)
+pool2 <- read.table("poll_ 2 _saida_modelo_null.txt", h=T)
+pool3 <- read.table("poll_ 3 _saida_modelo_null.txt", h=T)
+pool4 <- read.table("poll_ 4 _saida_modelo_null.txt", h=T)
+pool5 <- read.table("poll_ 5 _saida_modelo_null.txt", h=T)
+pool6 <- read.table("poll_ 6 _saida_modelo_null.txt", h=T)
+pool7 <- read.table("poll_ 7 _saida_modelo_null.txt", h=T)
+pool8 <- read.table("poll_ 8 _saida_modelo_null.txt", h=T)
+pool9 <- read.table("poll_ 9 _saida_modelo_null.txt", h=T)
+pool10 <- read.table("poll_ 10 _saida_modelo_null.txt", h=T)
+pool11 <- read.table("poll_ 11 _saida_modelo_null.txt", h=T)
+pool12 <- read.table("poll_ 12 _saida_modelo_null.txt", h=T)
+pool13 <- read.table("poll_ 13 _saida_modelo_null.txt", h=T)
+pool14 <- read.table("poll_ 14 _saida_modelo_null.txt", h=T)
+pool15 <- read.table("poll_ 15 _saida_modelo_null.txt", h=T)
+pool16 <- read.table("poll_ 16 _saida_modelo_null.txt", h=T)
+pool17 <- read.table("poll_ 17 _saida_modelo_null.txt", h=T)
+pool18 <- read.table("poll_ 18 _saida_modelo_null.txt", h=T)
+pool19 <- read.table("poll_ 19 _saida_modelo_null.txt", h=T)
+pool20 <- read.table("poll_ 20 _saida_modelo_null.txt", h=T)
+pool21 <- read.table("poll_ 21 _saida_modelo_null.txt", h=T)
+pool22 <- read.table("poll_ 22 _saida_modelo_null.txt", h=T)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
