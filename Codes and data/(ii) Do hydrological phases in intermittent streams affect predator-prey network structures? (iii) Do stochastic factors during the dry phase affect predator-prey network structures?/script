@@ -372,7 +372,7 @@ plot(mod1) # Visualizing the model's diagnostics plots:
 # - Residuals vs Leverage: Detecting outliers and influential points.
 
 # Model Analysis
-summary(mod17) # Displaying summary statistics of the model, including R-squared.
+summary(mod1) # Displaying summary statistics of the model, including R-squared.
 
 # Plotting
 nest_observed <- unique(pool1$Aninhamento_observed)
@@ -398,20 +398,24 @@ p1 <- ggplot(data = pool1, mapping = aes(x = prey_sub, y = Aninhamento_sub)) +
         axis.line.x = element_line(color = "black"),
         panel.background = element_rect(fill='white', colour = "black")) +
   annotate(geom="text", x=3,  y=0.25, hjust=0, size=6, color="black",
-           label=paste0("R² = 0.85",
-                        "\nSE = 0.0008",
-                        "\nT = 988.6",
+           label=paste0("R² = -0.03",
+                        "\nSE = 0.003",
+                        "\nT = -9.671",
                         "\nP-value = <0.05***"))
 
+p1
 
 # Calculate Z-scores for nestedness
 zs_nestedness_pool1 <- (pool1$Aninhamento_observed[1] - mean(pool1$Aninhamento_sub)) / sd(pool1$Aninhamento_sub)
+zs_nestedness_pool1
 
 # Calculate Z-scores for modularity
 zs_modularity_pool1 <- (pool1$Modularidade_observed[1] - mean(pool1$Modularidade_sub)) / sd(pool1$Modularidade_sub)
+zs_modularity_pool1
 
 # Calculate Z-scores for specialization
 zs_specialization_pool1 <- (pool1$Specialization_observed[1] - mean(pool1$Specialization_sub)) / sd(pool1$Specialization_sub)
+zs_specialization_pool1
 
 
 
