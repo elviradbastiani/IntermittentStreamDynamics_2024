@@ -1,0 +1,87 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D’Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D’Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question:
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Install and load necessary libraries
+install.packages("corrplot") # Install corrplot package for visualization
+install.packages("Hmisc") # Install Hmisc package for advanced correlation calculations
+library(corrplot) # Load corrplot package
+library(Hmisc) # Load Hmisc package
+
+# Read CSV files
+# Read environmental data into a data frame, using the first column as row names and semicolon as the delimiter
+amb <- read.csv("amb.csv", row.names = 1, sep = ";") # correlation of environmental data with predator richness and abundance
+
+# Read network metrics data into a data frame, using the first column as row names and semicolon as the delimiter
+met <- read.csv("met.csv", row.names = 1, sep = ";") ## correlation of network metrics with richness, predator abundance, and number of interactions
+
+
+# Calculate correlation matrix
+# Compute correlation matrix of the network metrics
+cor_matrix <- cor(met)
+
+# View the correlation matrix
+View(cor_matrix)
+
+# Save the correlation matrix to a CSV file
+write.csv(cor_matrix, "cor_met.csv")
+
+# Plot correlation matrix using different methods
+# Number method
+corrplot(cor_matrix, method = "number")
+
+# Plot correlation matrix with different positions
+# Upper triangle
+corrplot(cor_matrix, type = "upper")
+
+# Lower triangle
+corrplot(cor_matrix, type = "lower")
+
+# Lower triangle with numbers
+corrplot(cor_matrix, type = "lower", method = "number")
+
+# Advanced correlation calculations
+# Compute correlation coefficients, sample sizes, and p-values using rcorr
+advanced_corr <- rcorr(as.matrix(met))
+
+# View the correlation coefficients matrix
+correlation_coefficients <- advanced_corr$r
+
+# View the p-values matrix
+p_values <- advanced_corr$P
+
+# View the sample sizes
+sample_sizes <- advanced_corr$n
+
+# Save the p-values matrix to a CSV file
+write.csv(p_values, "cor_met_p.csv")
+
+# Plot correlation matrix with significance levels
+# Plot with significance level 0.04
+corrplot(correlation_coefficients, p.mat = p_values, sig.level = 0.04)
+
+# Plot lower triangle with significance level 0.04
+corrplot(correlation_coefficients, p.mat = p_values, sig.level = 0.04, type = "lower")
