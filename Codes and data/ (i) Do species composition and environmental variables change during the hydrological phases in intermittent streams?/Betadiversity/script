@@ -1,0 +1,143 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D’Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D’Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question:
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Install and load the betapart package (Baselga & Orme, 2012: betapart - an R package for the study of beta diversity)
+install.packages("betapart")
+library(betapart)
+library(vegan)
+library (picante)
+library(readxl)
+
+# Read the CSV file containing fish abundance data
+net <- data.frame(read.csv("fishabundance_dry.csv", header = TRUE, sep = ";"))
+
+# Transform the net data frame to binary (presence/absence) data. Change columns 2 to 19 to binary (presence/absence) data
+net[, 2:19] <- (as.numeric(as.matrix(net[, 2:19])) > 0) * 1
+
+# Ensure that the first column is not included in the analysis (assuming it's non-numeric, like an identifier)
+net_numeric <- net[, 2:19]
+
+# View the transformed data frame
+View(net_numeric)
+
+# Compute the core betapart objects
+net.core <- betapart.core(net_numeric)
+
+# Compute beta diversity metrics using the Sorensen index family
+net.multi <- beta.multi(net.core, index.family = "sorensen")
+print(net.multi)
+
+# Descriptions of beta diversity components:
+# beta.SIM: value of the turnover component, measured as Simpson dissimilarity
+# beta.SNE: value of the nestedness component, measured as nestedness-resultant fraction of Sorensen dissimilarity
+# beta.SOR: value of the overall beta diversity, measured as Sorensen dissimilarity
+
+# modelo nulo - aleatorizacoes
+BSO<-beta.sample(net_numeric,index.family="sorensen",sites=2, samples = 1000)
+BSO
+
+hist(BSO$sampled.values$beta.SIM)
+hist(BSO$sampled.values$beta.SNE)
+hist(BSO$sampled.values$beta.SOR)
+
+#Gerando P-value SIM
+modnull.SIM=BSO$sampled.values$beta.SIM#nosso modelo nulo 
+obs.SIM=net.multi $beta.SIM
+prop.SIM=modnull.SIM[modnull.SIM[]>=obs.SIM]#observado
+p.SIM=length(prop.SIM)/length(modnull.SIM)
+p.SIM#valor de P
+
+#Gerando P-value SNE
+modnull.SNE=BSO$sampled.values$beta.SNE#nosso modelo nulo 
+obs.SNE=net.multi $beta.SNE
+prop.SNE=modnull.SNE[modnull.SNE[]>=obs.SNE]#observado
+p.SNE=length(prop.SNE)/length(modnull.SNE)
+p.SNE#valor de P
+
+
+#Gerando P-value SOR
+modnull.SOR=BSO$sampled.values$beta.SOR#nosso modelo nulo 
+obs.SOR=net.multi $beta.SOR
+prop.SOR=modnull.SOR[modnull.SOR[]>=obs.SOR]#observado
+p.SOR=length(prop.SOR)/length(modnull.SOR)
+p.SOR#valor de P
+
+
+#************************************************************************************************************
+#histogramas
+#************************************************************************************************************
+# Save the histograms and boxplot as PNG files
+png(filename = "histograms_beta.png", width = 1200, height = 400)
+
+par(mfrow=c(1,3))
+par(mar=c(4.1,6.1,4.1,2.1))
+
+# Plot for beta.SOR
+hist(BSO$sampled.values$beta.SOR, border="black", lwd=3,
+     cex.lab=3, cex.axis=2, cex.main=3, cex.sub=3,
+     xlim=c(0,1), ylim=c(0,300), col="orange", xlab="βSOR", main="")
+abline(v=net.multi$beta.SOR, col="black", lty=3, lwd=2)
+
+# Plot for beta.SNE
+hist(BSO$sampled.values$beta.SNE, lwd=3, border="black",
+     cex.lab=3, cex.axis=2, cex.main=3, cex.sub=3,
+     xlim=c(0,1), ylim=c(0,300), col="red", xlab="βNES", main="")
+abline(v=net.multi$beta.SNE, col="black", lty=3, lwd=2)
+
+# Plot for beta.SIM
+hist(BSO$sampled.values$beta.SIM, lwd=3, border="black",
+     cex.lab=3, cex.axis=2, cex.main=3, cex.sub=3,
+     xlim=c(0,1), ylim=c(0,300), col="green4", xlab="βTUR", main="")
+abline(v=net.multi$beta.SIM, col="black", lty=3, lwd=2)
+
+# Close the PNG device
+dev.off()
+
+# Create data
+names <- c(rep("βTUR", 1000), rep("βNES", 1000))
+value <- c(modnull.SIM, modnull.SNE)
+data_betas <- data.frame(names, value)
+mean(modnull.SIM)
+mean(modnull.SNE)
+
+# Save the boxplot as PNG file
+png(filename = "boxplot_beta_parti.png", width = 800, height = 600)
+par(mfrow=c(1,1))
+par(mar=c(4.1,6.1,4.1,2.1))
+
+# Basic boxplot
+boxplot(data_betas$value ~ data_betas$names, cex.main=2.5, names=c("βNES", "βTUR"),
+        col=c("red", "green4"), cex.axis=2, xlab=" ", 
+        cex.lab=2, ylab="β-diversity", main=" ")
+points(rep(2:2), obs.SIM, pch=20, cex=4, col=rgb(0,0,0,.9)) 
+points(rep(1:1), obs.SNE, pch=20, cex=4, col=rgb(0,0,0,.9)) 
+
+# Close the PNG device
+dev.off()
+
+# Save the data to a CSV file
+write.csv2(data_betas, "data_betas.csv")
