@@ -1,0 +1,43 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D’Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+# Script created by: Milena Gonçalves-Silva
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D’Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question:
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Install and load the Factoshiny package
+install.packages("Factoshiny")
+library(Factoshiny)
+
+# Read the data from CSV files
+data <- read.csv("data.csv", sep = ";")
+
+# Perform PCA using Factoshiny
+pca.data <- PCAshiny(data) # Opens a browser window to edit and access information
+
+# The following commands replicate what was done in the browser window:
+# For all data:
+res.PCA <- PCA(data, quali.sup = c(1), graph = FALSE)
+plot.PCA(res.PCA, choix = 'var', habillage = 'contrib', cex = 1.5, cex.main = 1.5, cex.axis = 1.5)
+plotellipses(res.PCA, keepvar = 1, invisible = c('quali', 'ind.sup'), cex = 1.5, cex.main = 1.5, cex.axis = 1.5, label = 'none')
