@@ -1,0 +1,136 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D’Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+# Script created by: Elvira D’Bastiani
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D’Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question: 
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Load necessary libraries
+# (Note: Include any necessary library imports, such as library(ggplot2) if you use ggplot, etc.)
+
+# Specialization H2
+H2 <- read.csv("H2_ord.csv", row.names = 1, sep = ";")
+
+# Plotting the bar plot for Specialization H2' of pools
+barplot(t(H2),
+        main = "Specialization H2' of pools",
+        col = "gray",
+        las = 1,
+        ylab = "Specialization H2'",
+        cex.main = 1.2,
+        cex.lab = 1.2,
+        cex.axis = 1.2,
+        ylim = c(0, 1))
+box(bty = "l")
+
+# Flowing and Dry
+flowing <- read.csv("flowing FO.csv", row.names = 1, sep = ";")
+dry <- read.csv("dry FO.csv", row.names = 1, sep = ";")
+
+# Set up a plotting window with 2 plots side by side
+par(mfrow = c(1, 2))
+par(mar = c(4, 4, 3, 3))
+
+# Bar plot for Dry frequency of occurrence
+barplot(t(dry),
+        main = "Dry",
+        col = "orange",
+        las = 1,
+        ylab = "Frequency of Occurrence (%)",
+        cex.main = 1.2,
+        cex.lab = 1.2,
+        cex.axis = 1.2,
+        font.lab = 3,
+        font.axis = 3,
+        ylim = c(0, 100))
+box(bty = "l")
+
+# Bar plot for Flowing frequency of occurrence
+barplot(t(flowing),
+        main = "Flowing",
+        col = "blue",
+        las = 1,
+        ylab = "Frequency of Occurrence (%)",
+        cex.main = 1.2,
+        cex.lab = 1.2,
+        cex.axis = 1.2,
+        font.lab = 3,
+        font.axis = 3,
+        ylim = c(0, 100))
+box(bty = "l")
+
+# Combined Bar Plot for Flowing and Dry phases
+categories <- c("ter", "fish", "pre", "scr", "shr", "fil", "plant", "col", "det")
+FO_dry <- c(2.67, 4.10, 14.39, 8.67, 19.54, 34.03, 33.27, 56.91, 72.55)
+FO_Flowing <- c(2.81, 3.37, 6.18, 8.99, 12.92, 17.98, 40.17, 70.79, 94.38)
+
+# Create a data frame with the data
+data <- data.frame(
+  Category = categories,
+  Dry = FO_dry,
+  Flowing = FO_Flowing
+)
+
+# Bar plot comparing dry and flowing phases
+barplot(height = rbind(data$Flowing, data$Dry),
+        beside = TRUE,
+        names.arg = data$Category,
+        col = c("blue", "orange"),
+        ylim = c(0, max(data$Flowing, data$Dry) * 1.2),
+        xlab = "Food item categories",
+        ylab = "Frequency of occurrence (%)")
+legend("topright", legend = c("Dry", "Flowing"), fill = c("orange", "blue"))
+box(bty = "l")
+
+# Network Patterns
+random <- read.csv("random FO.csv", row.names = 1, sep = ";")
+nested <- read.csv("nested FO.csv", row.names = 1, sep = ";")
+module <- read.csv("module FO.csv", row.names = 1, sep = ";")
+NM <- read.csv("NM FO.csv", row.names = 1, sep = ";")
+
+categories <- c("ter", "fish", "pre", "scr", "shr", "fil", "plant", "col", "det")
+FO_random <- c(1.31, 3.30, 13.19, 8.57, 20.66, 29.23, 25.49, 48.79, 55.60)
+FO_nested <- c(3.83, 4.64, 10.08, 6.65, 21.37, 41.13, 35.89, 62.90, 88.10)
+FO_module <- c(2.94, 4.41, 48.53, 22.06, 5.88, 23.53, 66.18, 69.12, 77.94)
+FO_NM <- c(4.55, 9.09, 36.36, 18.18, 4.55, 0, 36.36, 54.55, 81.82)
+
+# Create a data frame with the data
+data <- data.frame(
+  Category = categories,
+  Random = FO_random,
+  Nested = FO_nested,
+  Module = FO_module,
+  NM = FO_NM
+)
+
+# Bar plot comparing network patterns
+barplot(height = rbind(data$Random, data$Nested, data$Module, data$NM),
+        beside = TRUE,
+        names.arg = data$Category,
+        col = c("blue", "red", "green", "purple"),
+        ylim = c(0, max(data$Random, data$Nested, data$Module, data$NM) * 1.2),
+        xlab = "Food item categories",
+        ylab = "Frequency of occurrence (%)")
+legend("topleft", legend = c("Random", "Nested", "Module", "Nested and Module"), fill = c("gray", "red", "green", "purple"))
+box(bty = "l")
