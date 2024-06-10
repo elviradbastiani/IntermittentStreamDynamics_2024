@@ -1,0 +1,155 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D’Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+# Script created by: Elvira D’Bastiani
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D’Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question: (ii) Do hydrological phases in intermittent streams affect predator-prey network structures? 
+#          (iii) Do stochastic factors during the dry phase affect predator-prey network structures?
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Install and load the Factoshiny package
+install.packages(c("bipartite", "ggplot2",
+                   "igraph", "viridis"))
+library("bipartite")
+library("ggplot2")
+library("igraph")
+library("viridis")
+
+
+# Function to compute metrics and normalize them
+metrics_norm <- function(matriz, nran) {
+  # Generate null models
+  null_model <- nullmodel(matriz, N = nran, method = "vaznull")
+  
+  # Data frames to store metrics
+  metricas_nulas <- data.frame(nestedness = as.numeric(),
+                               specialization = as.numeric(),
+                               modularity = as.numeric())
+  
+  # Output data frame
+  output <- data.frame(Nprey = as.numeric(),
+                       Npredator = as.numeric(),
+                       nestedness = as.numeric(),
+                       specialization = as.numeric(),
+                       modularity = as.numeric(),
+                       zs_nestedness = as.numeric(),
+                       zs_specialization = as.numeric(),
+                       zs_modularity = as.numeric(),
+                       dif_nestedness = as.numeric(),
+                       dif_specialization = as.numeric(),
+                       dif_modularity = as.numeric())
+  
+  # Compute metrics for null models
+  for(i in 1:length(null_model)){
+    metricas_nulas[i, ] <- NA
+    metricas_nulas$nestedness[i] <- nested(null_model[[i]], method = "NODF2", rescale = FALSE) / 100
+    
+    specialization_nulas <- H2fun(null_model[[i]], F)
+    metricas_nulas$specialization[i] <- specialization_nulas[1]
+    
+    m <- graph_from_incidence_matrix(null_model[[i]])
+    lou <- cluster_louvain(m)
+    metricas_nulas$modularity[i] <- modularity(lou)
+  }
+  
+  # Compute metrics for original matrix
+  Nprey <- sum(ncol(matriz))
+  Npredator <- sum(nrow(matriz))
+  
+  nestedness_sim <- nested(matriz, method = "NODF2", rescale = FALSE) / 100
+  zs_nestedness <- (nestedness_sim - mean(metricas_nulas$nestedness)) / sd(metricas_nulas$nestedness)
+  
+  specialization_s <- H2fun(matriz, F)
+  specialization_sim <- specialization_s[1]
+  zs_specialization <- (specialization_sim - mean(metricas_nulas$specialization)) / sd(metricas_nulas$specialization)
+  
+  m_s <- graph_from_incidence_matrix(matriz)
+  lou_s <- cluster_louvain(m_s)
+  modularity_sim <- modularity(lou_s)
+  zs_modularity <- (modularity_sim - mean(metricas_nulas$modularity)) / sd(metricas_nulas$modularity)
+  
+  dif_nestedness <- (nestedness_sim - mean(metricas_nulas$nestedness))
+  dif_specialization <- (specialization_sim - mean(metricas_nulas$specialization))
+  dif_modularity <- (modularity_sim - mean(metricas_nulas$modularity))
+  
+  output[1, ] <- c(Nprey, Npredator, nestedness_sim, specialization_sim,
+                   modularity_sim, zs_nestedness, zs_specialization,
+                   zs_modularity, dif_nestedness, dif_specialization, dif_modularity)
+  
+  return(output)
+}
+
+# Read the network data
+net_flowing <- read.csv("fooditems_flowing.csv", sep = ";", row.names = 1, dec = ".")
+
+# Convert networks to matrices
+net_flowing <- as.matrix(net_flowing)
+
+# Remove non-interacting species
+net_flowing <- net_flowing[, !!colSums(net_flowing)]
+net_flowing <- net_flowing[!!rowSums(net_flowing),]
+
+# Compute and extract specialization, nestedness, and modularity metrics
+specialization_flowing <- H2fun(net_flowing, F)
+nestedness_flowing <- nested(net_flowing, method = "NODF2", rescale = FALSE) / 100
+g_flowing <- graph_from_incidence_matrix(net_flowing)
+clu_louvg_flowing <- cluster_louvain(g_flowing)
+modularity_flowing <- modularity(clu_louvg_flowing)
+
+# Compute null model and normalization
+results_norm_flowing <- metrics_norm(net_flowing, 1000)
+
+# Process and write results to CSV
+write.csv(results_norm_flowing, "results_norm_flowing.csv")
+
+# Number of pools
+total_de_poll <- 22
+
+# Loop through each pool network
+saida <- NULL
+for (n in 1:total_de_poll) {
+  net_dry <- read.csv2(paste0("P", n, ".csv"), sep = ";", row.names = 1, dec = ".")
+  net_dry <- as.matrix(net_dry)
+  net_dry <- net_dry[, !!colSums(net_dry)]
+  net_dry <- net_dry[!!rowSums(net_dry),]
+  
+  specialization_dry <- H2fun(net_dry, F)
+  nestedness_dry <- nested(net_dry, method = "NODF2", rescale = FALSE) / 100
+  g_dry <- graph_from_incidence_matrix(net_dry)
+  clu_louvg_dry <- cluster_louvain(g_dry)
+  modularity_dry <- modularity(clu_louvg_dry)
+  
+  results_norm_dry <- metrics_norm(net_dry, 1000)
+  
+  if (n == 1) {
+    saida <- c(n, results_norm_dry)
+  } else {
+    saidab <- c(n, results_norm_dry)
+    saida <- rbind(saida, saidab)
+  }
+}
+
+# Organize and write results to CSV
+saida <- as.data.frame(saida)
+colnames(saida)[1] <- "pool"
+write.csv(as.matrix(saida), "results_norm_dry.csv")
