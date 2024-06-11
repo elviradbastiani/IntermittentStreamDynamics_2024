@@ -2,29 +2,43 @@ File 1. README.txt
     
 Folder: (i) Do species composition and environmental variables change during the hydrological phases in intermittent streams? 
         Folder: Betadiversity
-             File 1. script
+             File 1. script.r
              File 2. data_betas.csv
              File 3. fishabundance_dry.csv
 
         Folder: Mantel test
-             File 1. script
+             File 1. script.r
              File 2. abund.csv
              File 3. amb.csv
              File 4. dist.csv
              File 5. ext.csv
 
         Folder: NMDS
-             File 1. script 
+             File 1. script.r 
              File 2. fishabundance.csv
 
         Folder: PCA
-             File 1. script
+             File 1. script.r
              File 3. data.csv
 
         Folder: Pearson correlation
-             File 1. script
+             File 1. script.r
              File 2. met.csv
              File 3. amb.csv
+        
+        Folder: FO
+             File 1. script.r
+             File 2. H2_ord.csv
+             File 3. NM FO.csv
+             File 4. dry.csv
+             File 5. flowing.csv
+             File 6. module FO.csv
+             File 7. nested FO.csv
+             File 8. random FO.csv
+
+        Folder: GLM
+             File 1. script.r
+             File 2. interactions_pools.csv
 
 
 Folder: (ii) Do hydrological phases in intermittent streams affect predator-prey network structures? (iii) Do stochastic factors during the dry phase affect predator-prey network structures?
