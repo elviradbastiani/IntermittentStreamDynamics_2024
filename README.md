@@ -72,7 +72,7 @@ Folder: (i) Do species composition and environmental variables change during the
 
         Folder: GLM
              File 1. script.r
-             File 2. H2_ord.csv
+             File 2. interactions_pools.csv
              
 Folder: (ii) Do hydrological phases in intermittent streams affect predator-prey network structures? (iii) Do stochastic factors during the dry phase affect predator-prey network structures?
              File 1. script.r
