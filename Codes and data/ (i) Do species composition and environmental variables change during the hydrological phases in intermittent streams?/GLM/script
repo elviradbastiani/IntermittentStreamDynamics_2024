@@ -1,0 +1,119 @@
+#*****************************************************************************************
+# Manuscript: "Influence of intermittent stream dynamics on predator-prey interactions"
+# 1*Milena Gonçalves-Silva, 2Elvira D'Bastiani, 3Thibault Datry, 1Carla Ferreira Rezende
+# 1Programa de Pós-Graduação em Ecologia e Recursos Naturais, Universidade Federal do Ceará, Brasil.
+# 2Department of Ecology and Evolutionary Biology, University of California, Los Angeles, USA.
+# 3INRAE, UR RiverLy, Centre de Lyon-Villeurbanne, Villeurbanne, France.
+# *Corresponding author: Milena Gonçalves-Silva, e-mail: milenagoncalves.bio@gmail.com
+#*****************************************************************************************
+
+#Citation: Gonçalves-Silva, M., D'Bastiani, E., Datry, T., & Rezende, C. F. (Year). Influence of intermittent stream dynamics on predator-prey interactions. Journal of [Journal Name], [Year], [Volume(Issue)], [Page Range]. DOI: [DOI Number].
+
+#########################################################################################################################################
+#########################################################################################################################################
+#Question:
+#########################################################################################################################################
+#########################################################################################################################################
+
+# Setup 
+#To remove all objects stored in the current workspace
+rm(list=ls())
+
+#To clean up the garbage collection in R, you can use the gc() function:
+gc()
+
+# Directory
+setwd()
+
+# Load necessary libraries
+# If you don't have them, you might need to install them first using install.packages("ggplot2") and install.packages("reshape2")
+library(ggplot2)
+
+# Load the data
+data_interactions <- read.csv("interactions_pools.csv")
+
+# Check the structure of the data to ensure it was loaded correctly
+str(data_interactions)
+
+hist(data_interactions$Interactions)
+hist(data_interactions$Abunpredator)
+hist(data_interactions$Npredator)
+hist(data_interactions$Extension)
+
+# Perform the GLM (Generalized Linear Model)
+glm_model_1 <- glm(Interactions ~ Abunpredator + Npredator  + Extension, data = data_interactions, family = poisson)
+glm_model_2 <- glm(Interactions ~ Abunpredator +  Npredator, data = data_interactions, family = poisson)
+glm_model_3 <- glm(Interactions ~ Npredator, data = data_interactions, family = poisson)
+glm_model_4 <- glm(Interactions ~ Abunpredator  + Extension, data = data_interactions, family = poisson)
+glm_model_5 <- glm(Interactions ~ Abunpredator, data = data_interactions, family = poisson)
+glm_model_6 <- glm(Interactions ~ Extension, data = data_interactions, family = poisson)
+
+# Print the summaries of the GLM results
+summary(glm_model_1)
+summary(glm_model_2)
+summary(glm_model_3)
+summary(glm_model_4)
+summary(glm_model_5)
+summary(glm_model_6)
+
+compare_performance(glm_model_1,
+                    glm_model_2,
+                    glm_model_3,
+                    glm_model_4,
+                    glm_model_5,
+                    glm_model_6,rank = F)
+
+# Print the summary of the GLM results
+summary(glm_model_3)
+
+# Residuals analysis
+par(mfrow = c(2, 2))
+plot(glm_model_3)
+
+# Pseudo R-squared
+logLik_null <- logLik(glm(Interactions ~ 1, data = data_interactions, family = poisson))
+logLik_full <- logLik(glm_model_3)
+pseudo_r_squared <- 1 - (logLik_full / logLik_null)
+pseudo_r_squared
+
+# Correlation between observed and predicted values
+predicted_values <- predict(glm_model_3, type = "response")
+correlation <- cor(data_interactions$Interactions, predicted_values)
+correlation
+
+correlation <- cor_test(data_interactions,Interactions,Npredator,
+                alternative = "two.sided",method = "pearson",
+                conf.level = 0.95,use = "pairwise.complete.obs")
+correlation
+
+# Visualize the data with scatter plots for better understanding
+
+# Scatter plot of Interactions vs Extension
+plot_extension <- ggplot(data_interactions, aes(x = Npredator, y = Interactions)) +
+  geom_point(size=5) +
+  geom_smooth(method = "glm", method.args = list(family = "poisson"), se = TRUE,color = "black") +
+  labs(title = " ",
+       x = "Richness of predators",
+       y = "Interactions") +
+  scale_x_continuous(breaks = seq(min(data_interactions$Npredator), max(data_interactions$Npredator), by = 1)) +
+  scale_y_continuous(breaks = seq(min(data_interactions$Interactions), max(data_interactions$Interactions), by = 10)) +
+  theme(axis.title.x = element_text(color = "black", size = 20), 
+        axis.title.y = element_text(color = "black", size = 20), 
+        axis.text = element_text(color = "black", size = 18), 
+        legend.position = "none",
+        plot.background = element_rect(fill = 'white', color = NA),
+        plot.margin = margin(.5,1.2,.1,.5, "cm"),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line.y = element_line(color = "black"),
+        axis.line.x = element_line(color = "black"),
+        panel.background = element_rect(fill = 'white', colour = "black"))
+# Save the plot for Interactions vs Extension
+ggsave("GLM_Interactions_vs_Npredator.png", plot_extension)
+
+
+
+
+
+
+
