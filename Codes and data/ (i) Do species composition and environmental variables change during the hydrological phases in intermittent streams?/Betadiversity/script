@@ -12,7 +12,8 @@
 
 #########################################################################################################################################
 #########################################################################################################################################
-#Question: (i) What is the beta-diversity component (nestedness or turnover) that most contributes to beta diversity? 
+#Question: (i) What is the beta-diversity component (nestedness or turnover) that most contributes to beta diversity the species composition 
+           #(predators) among the pools?
            (ii) Does the beta diversity follow a non-random pattern?
 #########################################################################################################################################
 #########################################################################################################################################
@@ -58,7 +59,7 @@ print(net.multi)
 # beta.SNE: value of the nestedness component, measured as nestedness-resultant fraction of Sorensen dissimilarity
 # beta.SOR: value of the overall beta diversity, measured as Sorensen dissimilarity
 
-# modelo nulo - aleatorizacoes
+# null model - computing 1000 random samples
 BSO<-beta.sample(net_numeric,index.family="sorensen",sites=2, samples = 1000)
 BSO
 
@@ -66,14 +67,14 @@ hist(BSO$sampled.values$beta.SIM)
 hist(BSO$sampled.values$beta.SNE)
 hist(BSO$sampled.values$beta.SOR)
 
-#Gerando P-value SIM
+#P-value SIM
 modnull.SIM=BSO$sampled.values$beta.SIM#nosso modelo nulo 
 obs.SIM=net.multi $beta.SIM
 prop.SIM=modnull.SIM[modnull.SIM[]>=obs.SIM]#observado
 p.SIM=length(prop.SIM)/length(modnull.SIM)
 p.SIM#valor de P
 
-#Gerando P-value SNE
+#P-value SNE
 modnull.SNE=BSO$sampled.values$beta.SNE#nosso modelo nulo 
 obs.SNE=net.multi $beta.SNE
 prop.SNE=modnull.SNE[modnull.SNE[]>=obs.SNE]#observado
@@ -81,7 +82,7 @@ p.SNE=length(prop.SNE)/length(modnull.SNE)
 p.SNE#valor de P
 
 
-#Gerando P-value SOR
+#P-value SOR
 modnull.SOR=BSO$sampled.values$beta.SOR#nosso modelo nulo 
 obs.SOR=net.multi $beta.SOR
 prop.SOR=modnull.SOR[modnull.SOR[]>=obs.SOR]#observado
@@ -90,7 +91,7 @@ p.SOR#valor de P
 
 
 #************************************************************************************************************
-#histogramas
+#hist
 #************************************************************************************************************
 # Save the histograms and boxplot as PNG files
 png(filename = "histograms_beta.png", width = 1200, height = 400)
